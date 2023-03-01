@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <RootNamespace>LibPlcTag</RootNamespace>
+        <OtherFlags>--nowarn:9,51</OtherFlags>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Update="FSharp.Core" Version="7.0.200" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Include="Native.fs" />
+      <Compile Include="Primitives.fs" />
+      <Compile Include="Events.fs" />
+      <Compile Include="Tag.fs" />
+    </ItemGroup>
+
+</Project>
