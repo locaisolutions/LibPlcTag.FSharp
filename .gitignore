@@ -1,0 +1,9 @@
+.DS_Store
+.idea/
+bin/
+obj/
+*.dll
+*.dylib
+*.so
+!packages/**/runtimes/**/native/*
+*.nupkg
