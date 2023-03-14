@@ -3,7 +3,6 @@ module LibPlcTag.FSharp.Test.DataTypes.Bool
 open System.Threading
 open Expecto
 open LibPlcTag.FSharp
-open LibPlcTag.FSharp.Native
 open LibPlcTag.FSharp.Test.Utils
 
 [<Tests>]
@@ -20,17 +19,17 @@ let boolTests =
                         let mutable readCount = 0
 
                         use _ =
-                            tag.WriteCompleted.Subscribe(fun status ->
-                                status ==? STATUS_CODE.PLCTAG_STATUS_OK
+                            tag.WriteCompleted.Subscribe(fun struct (status, _) ->
+                                status ==? Status.Ok
                                 tag.BeginRead())
 
                         use _ =
-                            tag.ReadCompleted.Subscribe(fun struct (status, value) ->
-                                status ==? STATUS_CODE.PLCTAG_STATUS_OK
+                            tag.ReadCompleted.Subscribe(fun struct (status, _) ->
+                                status ==? Status.Ok
                                 // Expected values:
                                 // Read #1 - true
                                 // Read #2 - false
-                                value ==? (readCount = 0)
+                                tag.GetData() ==? (readCount = 0)
                                 readCount <- readCount + 1)
 
                         tag.BeginWrite true

@@ -2,65 +2,9 @@ module LibPlcTag.FSharp.Native
 
 open System.Runtime.InteropServices
 
-type DEBUG_LEVEL =
-    | PLCTAG_DEBUG_NONE = 0
-    | PLCTAG_DEBUG_ERROR = 1
-    | PLCTAG_DEBUG_WARN = 2
-    | PLCTAG_DEBUG_INFO = 3
-    | PLCTAG_DEBUG_DETAIL = 4
-    | PLCTAG_DEBUG_SPEW = 5
+[<Literal>]
+let private dllName = "plctag"
 
-type EVENT_CODE =
-    | PLCTAG_EVENT_CREATED = 7
-    | PLCTAG_EVENT_READ_STARTED = 1
-    | PLCTAG_EVENT_READ_COMPLETED = 2
-    | PLCTAG_EVENT_WRITE_STARTED = 3
-    | PLCTAG_EVENT_WRITE_COMPLETED = 4
-    | PLCTAG_EVENT_ABORTED = 5
-    | PLCTAG_EVENT_DESTROYED = 6
-
-type STATUS_CODE =
-    | PLCTAG_STATUS_PENDING = 1
-    | PLCTAG_STATUS_OK = 0
-    | PLCTAG_ERR_ABORT = -1
-    | PLCTAG_ERR_BAD_CONFIG = -2
-    | PLCTAG_ERR_BAD_CONNECTION = -3
-    | PLCTAG_ERR_BAD_DATA = -4
-    | PLCTAG_ERR_BAD_DEVICE = -5
-    | PLCTAG_ERR_BAD_GATEWAY = -6
-    | PLCTAG_ERR_BAD_PARAM = -7
-    | PLCTAG_ERR_BAD_REPLY = -8
-    | PLCTAG_ERR_BAD_STATUS = -9
-    | PLCTAG_ERR_CLOSE = -10
-    | PLCTAG_ERR_CREATE = -11
-    | PLCTAG_ERR_DUPLICATE = -12
-    | PLCTAG_ERR_ENCODE = -13
-    | PLCTAG_ERR_MUTEX_DESTROY = -14
-    | PLCTAG_ERR_MUTEX_INIT = -15
-    | PLCTAG_ERR_MUTEX_LOCK = -16
-    | PLCTAG_ERR_MUTEX_UNLOCK = -17
-    | PLCTAG_ERR_NOT_ALLOWED = -18
-    | PLCTAG_ERR_NOT_FOUND = -19
-    | PLCTAG_ERR_NOT_IMPLEMENTED = -20
-    | PLCTAG_ERR_NO_DATA = -21
-    | PLCTAG_ERR_NO_MATCH = -22
-    | PLCTAG_ERR_NO_MEM = -23
-    | PLCTAG_ERR_NO_RESOURCES = -24
-    | PLCTAG_ERR_NULL_PTR = -25
-    | PLCTAG_ERR_OPEN = -26
-    | PLCTAG_ERR_OUT_OF_BOUNDS = -27
-    | PLCTAG_ERR_READ = -28
-    | PLCTAG_ERR_REMOTE_ERR = -29
-    | PLCTAG_ERR_THREAD_CREATE = -30
-    | PLCTAG_ERR_THREAD_JOIN = -31
-    | PLCTAG_ERR_TIMEOUT = -32
-    | PLCTAG_ERR_TOO_LARGE = -33
-    | PLCTAG_ERR_TOO_SMALL = -34
-    | PLCTAG_ERR_UNSUPPORTED = -35
-    | PLCTAG_ERR_WINSOCK = -36
-    | PLCTAG_ERR_WRITE = -37
-    | PLCTAG_ERR_PARTIAL = -38
-    | PLCTAG_ERR_BUSY = -39
 
 [<UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = CharSet.Ansi)>]
 type log_callback_func = delegate of tag_id: int * debug_level: int * message: string -> unit
@@ -71,9 +15,6 @@ type tag_callback_func = delegate of tag_id: int * event: int * status: int -> u
 [<UnmanagedFunctionPointer(CallingConvention.Cdecl)>]
 type tag_callback_func_ex = delegate of tag_id: int * event: int * status: int * userdata: nativeint -> unit
 
-
-[<Literal>]
-let dllName = "plctag"
 
 [<DllImport(dllName)>]
 extern string plc_tag_decode_error(int err)
