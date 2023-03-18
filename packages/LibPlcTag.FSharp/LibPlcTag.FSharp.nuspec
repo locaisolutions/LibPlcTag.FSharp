@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>LibPlcTag.FSharp</id>
-    <version>1.0.0-beta</version>
+    <version>1.0.0</version>
     <authors>Ross Kuehl</authors>
     <!-- <icon>icon.png</icon> -->
     <license type="expression">AGPL-3.0-or-later</license>

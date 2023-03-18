@@ -1,3 +1,9 @@
+/// <summary>
+/// The native translation layer.
+/// Contains external function definitions and callbacks for communicating with the base library.
+/// </summary>
+/// <remarks>See the <a href="https://github.com/libplctag/libplctag/wiki/API">libplctag API documentation</a>
+/// for more info.</remarks>
 module LibPlcTag.FSharp.Native
 
 open System.Runtime.InteropServices

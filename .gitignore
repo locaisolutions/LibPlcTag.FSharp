@@ -7,3 +7,6 @@ obj/
 *.so
 !packages/**/runtimes/**/native/*
 *.nupkg
+.fsdocs/
+output/
+tmp/

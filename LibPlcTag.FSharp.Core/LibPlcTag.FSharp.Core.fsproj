@@ -33,6 +33,12 @@
         <Compile Include="Common.fs" />
         <Compile Include="TagMapper.fs" />
         <Compile Include="Tag.fs" />
+        <Compile Include="Logging.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0-preview.2.23128.3" />
+      <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
     </ItemGroup>
 
     <Target Name="CopyTarget" Condition="'$(Configuration)' == 'Release'" AfterTargets="PostBuildEvent">
@@ -42,5 +48,13 @@
         </PropertyGroup>
         <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(DestinationFolder)" />
     </Target>
+    
+    <PropertyGroup>
+        <RepositoryUrl>https://github.com/locaisolutions/LibPlcTag.FSharp</RepositoryUrl>
+        <FsDocsLicenseLink>https://github.com/locaisolutions/LibPlcTag.FSharp/blob/dev/LICENSE.md</FsDocsLicenseLink>
+        <FsDocsNavbarPosition>fixed-left</FsDocsNavbarPosition>
+        <FsDocsWarnOnMissingDocs>true</FsDocsWarnOnMissingDocs>
+        <FsDocsTheme>default</FsDocsTheme>
+    </PropertyGroup>
 
 </Project>

@@ -1,5 +1,15 @@
 namespace LibPlcTag.FSharp
 
+/// <summary>
+/// The library provides debugging output when enabled.
+/// There are three ways to set the debug level (for historical reasons):
+/// <list type="number">
+///     <item>Adding a debug attribute to the attribute string when creating a tag: "protocol=XXX&amp;...&amp;debug=4".</item>
+///     <item>Using the <see cref="M:LibPlcTag.FSharp.Native.plc_tag_set_int_attribute(int, string, int)"/>function to set the debug attribute.</item>
+///     <item>Using the <see cref="M:LibPlcTag.FSharp.Native.plc_tag_set_debug_level(int)"/> function.</item>
+/// </list>
+/// The preferred method in code is the last one.
+/// </summary>
 type DebugLevel =
     /// Disables debugging output.
     | None = 0
@@ -18,11 +28,11 @@ type DebugLevel =
     /// You have been warned!
     | Spew = 5
 
+/// <summary>
+/// The library provides functions to register a callback on a tag.
+/// These events generate a call to that callback.
+/// </summary>
 type Event =
-    /// The callback is called after a tag creation completes.
-    /// The final status of the creation is passed to the callback as well.
-    /// This is not as well supported in some cases, so only depend on this for normal tags and not tags like @tags.
-    | Created = 7
     /// A read of the tag has been requested.
     /// The callback is called immediately before the underlying protocol implementation is called.
     | ReadStarted = 1
@@ -35,13 +45,15 @@ type Event =
     /// The callback is called when the PLC indicates that the write has completed.
     /// The status of the write is passed to the callback.
     | WriteCompleted = 4
-    /// The callback function is called when something calls <see cref="T:LibPlcTag.FSharp.Native.plc_tag_abort"/> on the tag.
+    /// <summary>
+    /// The callback function is called when something calls <see cref="M:LibPlcTag.FSharp.Native.plc_tag_abort"/> on the tag.
+    /// </summary>
     | Aborted = 5
-    /// The callback function is called when the tag is being destroyed.
-    /// It is not safe to call any API functions on the tag at this time.
-    /// This is purely for the callback to manage any application state.
-    | Destroyed = 6
 
+/// <summary>
+/// Most functions return a status code.
+/// It will be one of these.
+/// </summary>
 type Status =
     /// Operation in progress. Not an error.
     | Pending = 1
@@ -90,7 +102,9 @@ type Status =
     | ErrorNotImplemented = -20
     /// Returned when expected data is not present.
     | ErrorNoData = -21
-    /// Similar to <see cref="T:Status.ErrorNotFound"/>
+    /// <summary>
+    /// Similar to <c>ErrorNotFound</c>
+    /// </summary>
     | ErrorNoMatch = -22
     /// Returned by the library when memory allocation fails.
     | ErrorNoMem = -23
@@ -126,3 +140,6 @@ type Status =
     | ErrorPartial = -38
     /// The operation cannot be performed as some other operation is taking place.
     | ErrorBusy = -39
+
+/// Thrown when an I/O operation fails or something bad happened
+exception LibPlcTagError of Status

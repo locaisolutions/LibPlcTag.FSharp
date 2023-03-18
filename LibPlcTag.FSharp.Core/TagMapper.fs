@@ -7,11 +7,17 @@ open System.Text
 open LibPlcTag.FSharp.Native
 open Microsoft.FSharp.NativeInterop
 
+/// <summary>
+/// Used to define custom data marshalling behavior.
+/// </summary>
 [<IsReadOnly; NoComparison; NoEquality; Struct>]
 type TagMapper<'T> =
     { Decode: int -> 'T
       Encode: int -> 'T -> unit }
 
+/// <summary>
+/// Contains a set of <see cref="T:LibPlcTag.FSharp.TagMapper"/> instances for common scenarios.
+/// </summary>
 [<AutoOpen>]
 module TagMapper =
     let boolMapper: TagMapper<bool> =

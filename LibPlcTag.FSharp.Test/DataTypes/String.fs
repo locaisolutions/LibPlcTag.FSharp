@@ -20,12 +20,12 @@ let stringTests =
                         let mutable readCompleted = false
 
                         use _ =
-                            tag.WriteCompleted.Subscribe(fun struct (status, _) ->
+                            tag.WriteCompleted.Subscribe(fun status ->
                                 status ==? Status.Ok
                                 tag.BeginRead())
 
                         use _ =
-                            tag.ReadCompleted.Subscribe(fun struct (status, _) ->
+                            tag.ReadCompleted.Subscribe(fun status ->
                                 status ==? Status.Ok
                                 tag.GetData() ==? message
                                 readCompleted <- true)
