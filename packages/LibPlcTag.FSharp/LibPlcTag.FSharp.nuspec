@@ -2,10 +2,10 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>LibPlcTag.FSharp</id>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <authors>Ross Kuehl</authors>
     <!-- <icon>icon.png</icon> -->
-    <license type="expression">AGPL-3.0-or-later</license>
+    <license type="expression">MPL-2.0</license>
     <description>Thin F# wrapper around libplctag, the C library for PLC communication</description>
     <dependencies>
       <group targetFramework="net7.0" />
