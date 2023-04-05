@@ -1,60 +1,24 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <LangVersion>latest</LangVersion>
-        <OtherFlags>--nowarn:9 --warnon:3390</OtherFlags>
-        <RootNamespace>LibPlcTag.FSharp</RootNamespace>
-        <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
-        <RuntimeIdentifiers>linux-arm64;linux-x64;linux-x86;osx-arm64;osx-x64;win-arm;win-arm64;win-x64;win-x86</RuntimeIdentifiers>
         <TargetFramework>net7.0</TargetFramework>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="$([MSBuild]::IsOsPlatform('Linux'))">
-        <RuntimeIdentifier Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm64'">linux-arm64</RuntimeIdentifier>
-        <RuntimeIdentifier Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X64'">linux-x64</RuntimeIdentifier>
-        <RuntimeIdentifier Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X86'">linux-x86</RuntimeIdentifier>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="$([MSBuild]::IsOsPlatform('OSX'))">
-        <RuntimeIdentifier Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm64'">osx-arm64</RuntimeIdentifier>
-        <RuntimeIdentifier Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X64'">osx-x64</RuntimeIdentifier>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="$([MSBuild]::IsOsPlatform('Windows'))">
-        <RuntimeIdentifier Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm'">win-arm</RuntimeIdentifier>
-        <RuntimeIdentifier Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm64'">win-arm64</RuntimeIdentifier>
-        <RuntimeIdentifier Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X64'">win-x64</RuntimeIdentifier>
-        <RuntimeIdentifier Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X86'">win-x86</RuntimeIdentifier>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <RootNamespace>LibPlcTag</RootNamespace>
+        <OtherFlags>--nowarn:9</OtherFlags>
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="Native.fs" />
-        <Compile Include="Common.fs" />
-        <Compile Include="TagMapper.fs" />
-        <Compile Include="Tag.fs" />
-        <Compile Include="Logging.fs" />
+      <PackageReference Update="FSharp.Core" Version="7.0.200" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0-preview.2.23128.3" />
-      <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
+      <Compile Include="Native.fs" />
+      <Compile Include="Primitives.fs" />
+      <Compile Include="Utils.fs" />
+      <Compile Include="Logging.fs" />
+      <Compile Include="TagEvents.fs" />
+      <Compile Include="Tag.fs" />
     </ItemGroup>
-
-    <Target Name="CopyTarget" Condition="'$(Configuration)' == 'Release'" AfterTargets="PostBuildEvent">
-        <PropertyGroup>
-            <DestinationFolder Condition="'$(PlatformTarget)' != 'AnyCPU'">$(ProjectDir)..\packages\$(RootNameSpace)\runtimes\$(RuntimeIdentifier)\lib\$(TargetFramework)</DestinationFolder>
-            <DestinationFolder Condition="'$(PlatformTarget)' == 'AnyCPU'">$(ProjectDir)..\packages\$(RootNameSpace)\ref\$(TargetFramework)</DestinationFolder>
-        </PropertyGroup>
-        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(DestinationFolder)" />
-    </Target>
-    
-    <PropertyGroup>
-        <RepositoryUrl>https://github.com/locaisolutions/LibPlcTag.FSharp</RepositoryUrl>
-        <FsDocsLicenseLink>https://github.com/locaisolutions/LibPlcTag.FSharp/blob/dev/LICENSE.md</FsDocsLicenseLink>
-        <FsDocsNavbarPosition>fixed-left</FsDocsNavbarPosition>
-        <FsDocsWarnOnMissingDocs>true</FsDocsWarnOnMissingDocs>
-        <FsDocsTheme>default</FsDocsTheme>
-    </PropertyGroup>
 
 </Project>

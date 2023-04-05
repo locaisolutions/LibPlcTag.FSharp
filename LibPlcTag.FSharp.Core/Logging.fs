@@ -1,68 +1,76 @@
-namespace LibPlcTag.FSharp
+module LibPlcTag.Logging
 
 open System
-open System.Runtime.CompilerServices
-open Microsoft.Extensions.DependencyInjection
-open Microsoft.Extensions.Logging
-open LibPlcTag.FSharp.Native
+open System.Collections.Concurrent
+open System.Threading
+open System.Threading.Channels
+open System.Threading.Tasks
+open LibPlcTag.Native
+open LibPlcTag.Utils
 
-type private LogEventArgs = (struct (DebugLevel * string))
+type LogEventArgs =
+    { TagId: int
+      DebugLevel: DebugLevel
+      Message: string }
 
-[<IsReadOnly; Struct>]
-type private LogActorMessage = LogEvent of event: LogEventArgs
+type LogEventCallback = LogEventArgs -> CancellationToken -> ValueTask
 
-/// <summary>
-/// Logs messages received from the base API.
-/// </summary>
 [<Sealed>]
-type LibPlcTagLogger(logger: LibPlcTagLogger ILogger) =
-    static let logEvent = Event<_>()
+type LogEventReader(logEventCallback: LogEventCallback, ?cancellationToken: CancellationToken) =
 
-    static let debugLevel2LogLevel (debugLevel: DebugLevel) =
-        match debugLevel with
-        | DebugLevel.None -> LogLevel.None
-        | DebugLevel.Error -> LogLevel.Error
-        | DebugLevel.Warn -> LogLevel.Warning
-        | DebugLevel.Info -> LogLevel.Information
-        | DebugLevel.Detail -> LogLevel.Debug
-        | DebugLevel.Spew -> LogLevel.Trace
-        | level -> failwithf "Unknown debug level %A{0}" level
+    static let unboundedChannelOptions: UnboundedChannelOptions =
+        UnboundedChannelOptions(SingleReader = true, SingleWriter = true)
 
-    static let logEventHandler (logger: LibPlcTagLogger ILogger) ((debugLevel, message): LogEventArgs) =
-        logger.Log(debugLevel2LogLevel debugLevel, message)
+    let cancellationToken = defaultArg cancellationToken CancellationToken.None
 
-    static let agent =
-        new MailboxProcessor<LogActorMessage>(fun inbox ->
-            let rec loop () =
-                async {
-                    match! inbox.Receive() with
-                    | LogEvent event -> logEvent.Trigger event
+    let unboundedChannel: Channel<LogEventArgs> =
+        Channel.CreateUnbounded(unboundedChannelOptions)
 
-                    return! loop ()
-                }
+    let mutable channelWriterId = Guid.Empty
 
-            loop ())
+    do
+        LogEventStream.InitializeIfNotInitialized()
+        channelWriterId <- LogEventStream.RegisterLogger(unboundedChannel.Writer)
 
-    static let cb _ debugLevel message =
-        LogEvent(enum debugLevel, message) |> agent.Post
-
-    let handler = logEventHandler logger |> logEvent.Publish.Subscribe
-
-    static do plc_tag_register_logger cb |> ignore
+        unboundedChannel
+            .Reader
+            .ReadAllAsync(cancellationToken)
+            .ForEachAsync(cancellationToken, logEventCallback)
+        |> ignore
 
     interface IDisposable with
-        member this.Dispose() = handler.Dispose()
+        member this.Dispose() =
+            LogEventStream.UnregisterLogger(channelWriterId) |> ignore
 
-/// <summary>
-/// Extension methods for <see cref="Microsoft.Extensions.DependencyInjection.IServiceCollection"/>
-/// </summary>
-[<Extension>]
-type IServiceCollectionExtensions =
-    /// <summary>
-    /// Registers a shared <c>LibPlcTagLogger</c> instance for dependency injection using the default service provider.
-    /// </summary>
-    /// <param name="services"><see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/></param>
-    [<Extension>]
-    static member inline AddLibPlcTagLogger(services: IServiceCollection) =
-        services.AddSingleton<LibPlcTagLogger>(fun container ->
-            new LibPlcTagLogger(container.GetRequiredService<ILogger<LibPlcTagLogger>>()))
+and [<AbstractClass; Sealed>] private LogEventStream private () =
+
+    static let mutable isInitialized = false
+
+    static let channelWriterLookup = ConcurrentDictionary<Guid, ChannelWriter<LogEventArgs>>()
+
+    static let logCallbackFunc tagId debugLevel message =
+        let logEventArgs =
+            { TagId = tagId
+              DebugLevel = enum debugLevel
+              Message = message }
+
+        for KeyValue(_, channelWriter) in channelWriterLookup do
+            channelWriter.TryWrite logEventArgs |> ignore
+
+    static member val private s_logCallbackFunc: log_callback_func = log_callback_func logCallbackFunc
+
+    static member InitializeIfNotInitialized() : unit =
+        if not <| isInitialized then
+            isInitialized <- true
+            plc_tag_register_logger LogEventStream.s_logCallbackFunc |> ignore
+
+    static member RegisterLogger(channelWriter: ChannelWriter<LogEventArgs>) : Guid =
+        let channelWriterId = Guid.NewGuid()
+        channelWriterLookup.TryAdd(channelWriterId, channelWriter) |> ignore
+        channelWriterId
+
+    static member UnregisterLogger(channelWriterId: Guid) : bool =
+        let mutable channelWriter = Unchecked.defaultof<_>
+
+        channelWriterLookup.TryRemove(channelWriterId, &channelWriter)
+        && channelWriter.TryComplete()

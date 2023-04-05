@@ -2,11 +2,3 @@
 .idea/
 bin/
 obj/
-*.dll
-*.dylib
-*.so
-!packages/**/runtimes/**/native/*
-*.nupkg
-.fsdocs/
-output/
-tmp/
